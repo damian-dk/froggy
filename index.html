@@ -15,7 +15,7 @@
     #game-container {
       position: relative;
       width: 100vw;
-      height: 90vh;
+      height: 85vh;
       background-color: #a3d977;
     }
     #froggy {
@@ -27,11 +27,20 @@
       top: 50px;
     }
     #controls {
-      height: 10vh;
+      height: 15vh;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       background-color: #333;
+      color: #fff;
+    }
+    #banner {
+      font-size: 14px;
+      margin-top: 5px;
+    }
+    #button-bar {
+      margin-bottom: 5px;
     }
     .btn {
       margin: 0 10px;
@@ -81,11 +90,15 @@
     <button id="btn-down">&#9660;</button>
   </div>
   <div id="controls">
-    <button class="btn" onclick="newGame()">New Game</button>
-    <button class="btn" onclick="quitGame()">Quit</button>
+    <div id="button-bar">
+      <button class="btn" onclick="newGame()">New Game</button>
+      <button class="btn" onclick="quitGame()">Quit</button>
+    </div>
+    <div id="banner"></div>
   </div>
 
   <script>
+    const version = 1;
     const froggy = document.getElementById('froggy');
     let x = 50;
     let y = 50;
@@ -141,7 +154,9 @@
     });
 
     const touchControls = document.getElementById('touch-controls');
+    const banner = document.getElementById('banner');
     if ('ontouchstart' in window) {
+      banner.textContent = 'Tap the arrows to move and the A button to attack. Version ' + version;
       touchControls.classList.add('show');
       document.getElementById('btn-up').addEventListener('touchstart', moveUp);
       document.getElementById('btn-down').addEventListener('touchstart', moveDown);
@@ -154,6 +169,8 @@
       document.getElementById('btn-left').addEventListener('click', moveLeft);
       document.getElementById('btn-right').addEventListener('click', moveRight);
       document.getElementById('btn-attack').addEventListener('click', performAttack);
+    } else {
+      banner.textContent = 'Use arrow keys to move and "A" to attack. Version ' + version;
     }
 
     function newGame() {
