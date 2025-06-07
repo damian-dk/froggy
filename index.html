@@ -41,11 +41,44 @@
       cursor: pointer;
       font-size: 16px;
     }
+    #touch-controls {
+      position: absolute;
+      bottom: 15vh;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 180px;
+      display: none;
+      grid-template-columns: repeat(3, 60px);
+      grid-template-rows: repeat(3, 60px);
+      grid-template-areas:
+        ". up ."
+        "left attack right"
+        ". down .";
+      gap: 5px;
+    }
+    #touch-controls button {
+      font-size: 20px;
+      background-color: #fff;
+      border: none;
+    }
+    #btn-up { grid-area: up; }
+    #btn-down { grid-area: down; }
+    #btn-left { grid-area: left; }
+    #btn-right { grid-area: right; }
+    #btn-attack { grid-area: attack; }
+    #touch-controls.show { display: grid; }
   </style>
 </head>
 <body>
   <div id="game-container">
     <div id="froggy"></div>
+  </div>
+  <div id="touch-controls">
+    <button id="btn-up">&#9650;</button>
+    <button id="btn-left">&#9664;</button>
+    <button id="btn-attack">A</button>
+    <button id="btn-right">&#9654;</button>
+    <button id="btn-down">&#9660;</button>
   </div>
   <div id="controls">
     <button class="btn" onclick="newGame()">New Game</button>
@@ -83,12 +116,17 @@
       froggy.style.backgroundImage = `url('${directions[direction]}')`;
     }
 
-    function performAttack() {
-      froggy.style.backgroundImage = `url('${attackSprites[currentDirection]}')`;
-      setTimeout(() => {
-        froggy.style.backgroundImage = `url('${directions[currentDirection]}')`;
-      }, 300);
-    }
+  function performAttack() {
+    froggy.style.backgroundImage = `url('${attackSprites[currentDirection]}')`;
+    setTimeout(() => {
+      froggy.style.backgroundImage = `url('${directions[currentDirection]}')`;
+    }, 300);
+  }
+
+  function moveUp() { y -= step; updateDirection('up'); updatePosition(); }
+  function moveDown() { y += step; updateDirection('down'); updatePosition(); }
+  function moveLeft() { x -= step; updateDirection('left'); updatePosition(); }
+  function moveRight() { x += step; updateDirection('right'); updatePosition(); }
 
     document.addEventListener('keydown', (e) => {
       switch (e.key) {
@@ -101,6 +139,22 @@
       }
       updatePosition();
     });
+
+    const touchControls = document.getElementById('touch-controls');
+    if ('ontouchstart' in window) {
+      touchControls.classList.add('show');
+      document.getElementById('btn-up').addEventListener('touchstart', moveUp);
+      document.getElementById('btn-down').addEventListener('touchstart', moveDown);
+      document.getElementById('btn-left').addEventListener('touchstart', moveLeft);
+      document.getElementById('btn-right').addEventListener('touchstart', moveRight);
+      document.getElementById('btn-attack').addEventListener('touchstart', performAttack);
+      // Fallback for taps/clicks
+      document.getElementById('btn-up').addEventListener('click', moveUp);
+      document.getElementById('btn-down').addEventListener('click', moveDown);
+      document.getElementById('btn-left').addEventListener('click', moveLeft);
+      document.getElementById('btn-right').addEventListener('click', moveRight);
+      document.getElementById('btn-attack').addEventListener('click', performAttack);
+    }
 
     function newGame() {
       x = 50;
