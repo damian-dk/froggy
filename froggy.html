@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Froggy Warrior Game</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #d0e0f0;
+      font-family: Arial, sans-serif;
+    }
+    #game-container {
+      position: relative;
+      width: 100vw;
+      height: 90vh;
+      background-color: #a3d977;
+    }
+    #froggy {
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      background-size: cover;
+      left: 50px;
+      top: 50px;
+    }
+    #controls {
+      height: 10vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #333;
+    }
+    .btn {
+      margin: 0 10px;
+      padding: 10px 20px;
+      background-color: #fff;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <div id="froggy"></div>
+  </div>
+  <div id="controls">
+    <button class="btn" onclick="newGame()">New Game</button>
+    <button class="btn" onclick="quitGame()">Quit</button>
+  </div>
+
+  <script>
+    const froggy = document.getElementById('froggy');
+    let x = 50;
+    let y = 50;
+    const step = 10;
+    let currentDirection = 'down';
+
+    const directions = {
+      up: 'froggy-up.png',
+      down: 'froggy-down.png',
+      left: 'froggy-left.png',
+      right: 'froggy-right.png'
+    };
+
+    const attackSprites = {
+      up: 'froggy-up-attack.png',
+      down: 'froggy-down-attack.png',
+      left: 'froggy-left-attack.png',
+      right: 'froggy-right-attack.png'
+    };
+
+    function updatePosition() {
+      froggy.style.left = x + 'px';
+      froggy.style.top = y + 'px';
+    }
+
+    function updateDirection(direction) {
+      currentDirection = direction;
+      froggy.style.backgroundImage = `url('${directions[direction]}')`;
+    }
+
+    function performAttack() {
+      froggy.style.backgroundImage = `url('${attackSprites[currentDirection]}')`;
+      setTimeout(() => {
+        froggy.style.backgroundImage = `url('${directions[currentDirection]}')`;
+      }, 300);
+    }
+
+    document.addEventListener('keydown', (e) => {
+      switch (e.key) {
+        case 'ArrowUp': y -= step; updateDirection('up'); break;
+        case 'ArrowDown': y += step; updateDirection('down'); break;
+        case 'ArrowLeft': x -= step; updateDirection('left'); break;
+        case 'ArrowRight': x += step; updateDirection('right'); break;
+        case 'a':
+        case 'A': performAttack(); break;
+      }
+      updatePosition();
+    });
+
+    function newGame() {
+      x = 50;
+      y = 50;
+      updateDirection('down');
+      updatePosition();
+    }
+
+    function quitGame() {
+      alert('Thanks for playing!');
+      window.close();
+    }
+
+    // Initial setup
+    updateDirection('down');
+  </script>
+</body>
+</html>
