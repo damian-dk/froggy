@@ -258,6 +258,7 @@
       endMessage.style.color = 'red';
       endMessage.style.display = 'block';
       froggy.style.backgroundImage = "url('froggy-gameover.png')";
+      froggy.style.zIndex = '2';
       gameActive = false;
   }
 
@@ -283,6 +284,8 @@ function performAttack() {
       endMessage.textContent = 'You win!';
       endMessage.style.color = 'blue';
       endMessage.style.display = 'block';
+      froggy.style.backgroundImage = "url('froggy-win.png')";
+      froggy.style.zIndex = '2';
       gameActive = false;
       stopCountdown();
     }
@@ -344,6 +347,7 @@ function performAttack() {
     updatePosition();
     whale.style.backgroundImage = "url('whale-boss.png')";
     updateWhalePosition();
+    froggy.style.zIndex = '';
     stopCountdown();
   }
 
