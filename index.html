@@ -44,6 +44,16 @@
       font-size: 24px;
       display: none;
     }
+    #end-message {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 48px;
+      font-weight: bold;
+      display: none;
+      text-align: center;
+    }
     #controls {
       height: 15vh;
       display: flex;
@@ -103,6 +113,7 @@
     <div id="whale">
       <div id="whale-countdown"></div>
     </div>
+    <div id="end-message"></div>
   </div>
   <div id="touch-controls">
     <button id="btn-up">&#9650;</button>
@@ -124,6 +135,7 @@
     const froggy = document.getElementById('froggy');
     const whale = document.getElementById('whale');
     const whaleCountdown = document.getElementById('whale-countdown');
+    const endMessage = document.getElementById('end-message');
     let x = 50;
     let y = 50;
     const step = 10;
@@ -219,7 +231,10 @@
   }
 
   function gameOver() {
-      banner.textContent = 'Game Over!';
+      banner.textContent = '';
+      endMessage.textContent = 'Game Over!';
+      endMessage.style.color = 'red';
+      endMessage.style.display = 'block';
       gameActive = false;
   }
 
@@ -240,19 +255,23 @@ function performAttack() {
       }
     }, 300);
     if (whaleHealth <= 0) {
-      banner.textContent = 'You win!';
+      banner.textContent = '';
+      endMessage.textContent = 'You win!';
+      endMessage.style.color = 'blue';
+      endMessage.style.display = 'block';
       gameActive = false;
       stopCountdown();
     }
   }
 }
 
-  function moveUp() { y -= step; updateDirection('up'); updatePosition(); }
-  function moveDown() { y += step; updateDirection('down'); updatePosition(); }
-  function moveLeft() { x -= step; updateDirection('left'); updatePosition(); }
-  function moveRight() { x += step; updateDirection('right'); updatePosition(); }
+  function moveUp() { if (!gameActive) return; y -= step; updateDirection('up'); updatePosition(); }
+  function moveDown() { if (!gameActive) return; y += step; updateDirection('down'); updatePosition(); }
+  function moveLeft() { if (!gameActive) return; x -= step; updateDirection('left'); updatePosition(); }
+  function moveRight() { if (!gameActive) return; x += step; updateDirection('right'); updatePosition(); }
 
     document.addEventListener('keydown', (e) => {
+      if (!gameActive) return;
       switch (e.key) {
         case 'ArrowUp': y -= step; updateDirection('up'); break;
         case 'ArrowDown': y += step; updateDirection('down'); break;
@@ -295,6 +314,7 @@ function performAttack() {
     whaleHealth = 10;
     gameActive = true;
     banner.textContent = instructions;
+    endMessage.style.display = 'none';
     updateDirection('down');
     updatePosition();
     whale.style.backgroundImage = "url('whale-boss.png')";
