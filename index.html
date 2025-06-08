@@ -26,6 +26,24 @@
       left: 50px;
       top: 50px;
     }
+    #whale {
+      position: absolute;
+      width: 150px;
+      height: 150px;
+      background-size: cover;
+      left: 400px;
+      top: 200px;
+    }
+    #whale-countdown {
+      position: absolute;
+      top: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: red;
+      font-weight: bold;
+      font-size: 24px;
+      display: none;
+    }
     #controls {
       height: 15vh;
       display: flex;
@@ -82,6 +100,9 @@
 <body>
   <div id="game-container">
     <div id="froggy"></div>
+    <div id="whale">
+      <div id="whale-countdown"></div>
+    </div>
   </div>
   <div id="touch-controls">
     <button id="btn-up">&#9650;</button>
@@ -101,10 +122,18 @@
   <script>
     const version = 1;
     const froggy = document.getElementById('froggy');
+    const whale = document.getElementById('whale');
+    const whaleCountdown = document.getElementById('whale-countdown');
     let x = 50;
     let y = 50;
     const step = 10;
     let currentDirection = 'down';
+    let whaleX = 400;
+    let whaleY = 200;
+    const whaleStep = step / 2;
+    let whaleHealth = 10;
+    let countdownInterval = null;
+    let gameActive = true;
 
     const directions = {
       up: 'froggy-up.png',
@@ -125,17 +154,98 @@
       froggy.style.top = y + 'px';
     }
 
-    function updateDirection(direction) {
+  function updateDirection(direction) {
       currentDirection = direction;
       froggy.style.backgroundImage = `url('${directions[direction]}')`;
-    }
-
-  function performAttack() {
-    froggy.style.backgroundImage = `url('${attackSprites[currentDirection]}')`;
-    setTimeout(() => {
-      froggy.style.backgroundImage = `url('${directions[currentDirection]}')`;
-    }, 300);
   }
+
+  function updateWhalePosition() {
+      whale.style.left = whaleX + 'px';
+      whale.style.top = whaleY + 'px';
+  }
+
+  function moveWhale() {
+      const dx = x - whaleX;
+      const dy = y - whaleY;
+      const dist = Math.hypot(dx, dy);
+      if (dist > 0) {
+          if (Math.abs(dx) > whaleStep) whaleX += Math.sign(dx) * whaleStep; else whaleX += dx;
+          if (Math.abs(dy) > whaleStep) whaleY += Math.sign(dy) * whaleStep; else whaleY += dy;
+      }
+      updateWhalePosition();
+  }
+
+  function startCountdown() {
+      if (countdownInterval) return;
+      let time = 5;
+      whaleCountdown.textContent = time;
+      whaleCountdown.style.display = 'block';
+      countdownInterval = setInterval(() => {
+          time--;
+          if (time <= 0) {
+              whaleAttack();
+          } else {
+              whaleCountdown.textContent = time;
+          }
+      }, 1000);
+  }
+
+  function stopCountdown() {
+      whaleCountdown.style.display = 'none';
+      if (countdownInterval) {
+          clearInterval(countdownInterval);
+          countdownInterval = null;
+      }
+  }
+
+  function checkProximity() {
+      const dx = x - whaleX;
+      const dy = y - whaleY;
+      const dist = Math.hypot(dx, dy);
+      if (dist <= 100) {
+          startCountdown();
+      } else {
+          stopCountdown();
+      }
+  }
+
+  function whaleAttack() {
+      stopCountdown();
+      whale.style.backgroundImage = "url('whale-boss-attack.png')";
+      setTimeout(() => {
+          whale.style.backgroundImage = "url('whale-boss.png')";
+      }, 300);
+      gameOver();
+  }
+
+  function gameOver() {
+      banner.textContent = 'Game Over!';
+      gameActive = false;
+  }
+
+function performAttack() {
+  if (!gameActive) return;
+  froggy.style.backgroundImage = `url('${attackSprites[currentDirection]}')`;
+  setTimeout(() => {
+    froggy.style.backgroundImage = `url('${directions[currentDirection]}')`;
+  }, 300);
+  const dx = x - whaleX;
+  const dy = y - whaleY;
+  if (Math.hypot(dx, dy) <= 100) {
+    whaleHealth--;
+    whale.style.backgroundImage = "url('whale-boss-hit.png')";
+    setTimeout(() => {
+      if (whaleHealth > 0) {
+        whale.style.backgroundImage = "url('whale-boss.png')";
+      }
+    }, 300);
+    if (whaleHealth <= 0) {
+      banner.textContent = 'You win!';
+      gameActive = false;
+      stopCountdown();
+    }
+  }
+}
 
   function moveUp() { y -= step; updateDirection('up'); updatePosition(); }
   function moveDown() { y += step; updateDirection('down'); updatePosition(); }
@@ -156,8 +266,10 @@
 
     const touchControls = document.getElementById('touch-controls');
     const banner = document.getElementById('banner');
+    let instructions;
     if ('ontouchstart' in window) {
-      banner.textContent = 'Tap the arrows to move and the A button to attack. Version ' + version;
+      instructions = 'Tap the arrows to move and the A button to attack. Version ' + version;
+      banner.textContent = instructions;
       touchControls.classList.add('show');
       document.getElementById('btn-up').addEventListener('touchstart', moveUp);
       document.getElementById('btn-down').addEventListener('touchstart', moveDown);
@@ -171,23 +283,41 @@
       document.getElementById('btn-right').addEventListener('click', moveRight);
       document.getElementById('btn-attack').addEventListener('click', performAttack);
     } else {
-      banner.textContent = 'Use arrow keys to move and "A" to attack. Version ' + version;
+      instructions = 'Use arrow keys to move and "A" to attack. Version ' + version;
+      banner.textContent = instructions;
     }
 
-    function newGame() {
-      x = 50;
-      y = 50;
-      updateDirection('down');
-      updatePosition();
-    }
+  function newGame() {
+    x = 50;
+    y = 50;
+    whaleX = 400;
+    whaleY = 200;
+    whaleHealth = 10;
+    gameActive = true;
+    banner.textContent = instructions;
+    updateDirection('down');
+    updatePosition();
+    whale.style.backgroundImage = "url('whale-boss.png')";
+    updateWhalePosition();
+    stopCountdown();
+  }
 
-    function quitGame() {
+  function quitGame() {
       alert('Thanks for playing!');
       window.close();
     }
 
     // Initial setup
     updateDirection('down');
+    updatePosition();
+    whale.style.backgroundImage = "url('whale-boss.png')";
+    updateWhalePosition();
+    setInterval(() => {
+      if (gameActive) {
+        moveWhale();
+        checkProximity();
+      }
+    }, 200);
   </script>
 </body>
 </html>
