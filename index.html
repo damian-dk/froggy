@@ -34,9 +34,23 @@
       left: 400px;
       top: 200px;
     }
+    #whale-health-bar {
+      position: absolute;
+      top: -15px;
+      left: 0;
+      width: 100%;
+      height: 10px;
+      background-color: red;
+    }
+    #whale-health {
+      height: 100%;
+      background-color: green;
+      width: 100%;
+    }
     #whale-countdown {
       position: absolute;
-      top: -25px;
+      /* place the countdown above the health bar */
+      top: -45px;
       left: 50%;
       transform: translateX(-50%);
       color: red;
@@ -108,13 +122,14 @@
   </style>
 </head>
 <body>
-  <div id="game-container">
-    <div id="froggy"></div>
-    <div id="whale">
-      <div id="whale-countdown"></div>
+    <div id="game-container">
+      <div id="froggy"></div>
+      <div id="whale">
+        <div id="whale-health-bar"><div id="whale-health"></div></div>
+        <div id="whale-countdown"></div>
+      </div>
+      <div id="end-message"></div>
     </div>
-    <div id="end-message"></div>
-  </div>
   <div id="touch-controls">
     <button id="btn-up">&#9650;</button>
     <button id="btn-left">&#9664;</button>
@@ -135,6 +150,7 @@
     const froggy = document.getElementById('froggy');
     const whale = document.getElementById('whale');
     const whaleCountdown = document.getElementById('whale-countdown');
+    const whaleHealthFill = document.getElementById('whale-health');
     const endMessage = document.getElementById('end-message');
     let x = 50;
     let y = 50;
@@ -143,7 +159,8 @@
     let whaleX = 400;
     let whaleY = 200;
     const whaleStep = step / 2;
-    let whaleHealth = 30;
+    const maxWhaleHealth = 30;
+    let whaleHealth = maxWhaleHealth;
     let countdownInterval = null;
     let gameActive = true;
 
@@ -174,6 +191,11 @@
   function updateWhalePosition() {
       whale.style.left = whaleX + 'px';
       whale.style.top = whaleY + 'px';
+  }
+
+  function updateWhaleHealthBar() {
+      const percent = (whaleHealth / maxWhaleHealth) * 100;
+      whaleHealthFill.style.width = percent + '%';
   }
 
   function moveWhale() {
@@ -249,6 +271,7 @@ function performAttack() {
   const dy = y - whaleY;
   if (Math.hypot(dx, dy) <= 100) {
     whaleHealth--;
+    updateWhaleHealthBar();
     whale.style.backgroundImage = "url('whale-boss-hit.png')";
     setTimeout(() => {
       if (whaleHealth > 0) {
@@ -312,7 +335,8 @@ function performAttack() {
     y = 50;
     whaleX = 400;
     whaleY = 200;
-    whaleHealth = 10;
+    whaleHealth = maxWhaleHealth;
+    updateWhaleHealthBar();
     gameActive = true;
     banner.textContent = instructions;
     endMessage.style.display = 'none';
@@ -333,6 +357,7 @@ function performAttack() {
     updatePosition();
     whale.style.backgroundImage = "url('whale-boss.png')";
     updateWhalePosition();
+    updateWhaleHealthBar();
     setInterval(() => {
       if (gameActive) {
         moveWhale();
