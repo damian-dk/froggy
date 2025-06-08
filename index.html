@@ -266,7 +266,9 @@ function performAttack() {
   if (!gameActive) return;
   froggy.style.backgroundImage = `url('${attackSprites[currentDirection]}')`;
   setTimeout(() => {
-    froggy.style.backgroundImage = `url('${directions[currentDirection]}')`;
+    if (gameActive) {
+      froggy.style.backgroundImage = `url('${directions[currentDirection]}')`;
+    }
   }, 300);
   const dx = x - whaleX;
   const dy = y - whaleY;
