@@ -9,7 +9,7 @@
       margin: 0;
       padding: 0;
       overflow: hidden;
-      background-color: #d0e0f0;
+      background-color: gray;
       font-family: Arial, sans-serif;
     }
     #game-container {
@@ -34,10 +34,17 @@
       left: 400px;
       top: 200px;
     }
-    #whale-health-bar {
+    #whale-health-container,
+    #froggy-health-container {
       position: absolute;
       top: -15px;
       left: 0;
+      display: flex;
+      align-items: center;
+    }
+
+    #whale-health-bar,
+    #froggy-health-bar {
       width: 100%;
       height: 10px;
       background-color: red;
@@ -46,6 +53,17 @@
       height: 100%;
       background-color: green;
       width: 100%;
+    }
+    #froggy-health {
+      height: 100%;
+      background-color: green;
+      width: 100%;
+    }
+    #whale-hp,
+    #froggy-hp {
+      margin-right: 5px;
+      color: white;
+      font-weight: bold;
     }
     #whale-countdown {
       position: absolute;
@@ -140,10 +158,18 @@
 </head>
 <body>
     <div id="game-container">
-      <div id="froggy"></div>
+      <div id="froggy">
+        <div id="froggy-health-container">
+          <span id="froggy-hp"></span>
+          <div id="froggy-health-bar"><div id="froggy-health"></div></div>
+        </div>
+      </div>
       <div id="bearbear"></div>
       <div id="whale">
-        <div id="whale-health-bar"><div id="whale-health"></div></div>
+        <div id="whale-health-container">
+          <span id="whale-hp"></span>
+          <div id="whale-health-bar"><div id="whale-health"></div></div>
+        </div>
         <div id="whale-countdown"></div>
       </div>
       <div id="end-message"></div>
@@ -169,6 +195,9 @@
     const whale = document.getElementById('whale');
     const whaleCountdown = document.getElementById('whale-countdown');
     const whaleHealthFill = document.getElementById('whale-health');
+    const whaleHpText = document.getElementById('whale-hp');
+    const froggyHealthFill = document.getElementById('froggy-health');
+    const froggyHpText = document.getElementById('froggy-hp');
     const endMessage = document.getElementById('end-message');
     let x = 50;
     let y = 50;
@@ -179,6 +208,8 @@
     const whaleStep = step / 2;
     const maxWhaleHealth = 30;
     let whaleHealth = maxWhaleHealth;
+    const maxFroggyHealth = 10;
+    let froggyHealth = maxFroggyHealth;
     let countdownInterval = null;
     let gameActive = true;
 
@@ -223,6 +254,13 @@
   function updateWhaleHealthBar() {
       const percent = (whaleHealth / maxWhaleHealth) * 100;
       whaleHealthFill.style.width = percent + '%';
+      whaleHpText.textContent = whaleHealth;
+  }
+
+  function updateFroggyHealthBar() {
+      const percent = (froggyHealth / maxFroggyHealth) * 100;
+      froggyHealthFill.style.width = percent + '%';
+      froggyHpText.textContent = froggyHealth;
   }
 
   function updateBearPosition() {
@@ -307,6 +345,8 @@
       endMessage.style.display = 'block';
       froggy.style.backgroundImage = "url('froggy-gameover.png')";
       froggy.style.zIndex = '2';
+      froggyHealth = 0;
+      updateFroggyHealthBar();
       gameActive = false;
   }
 
@@ -456,7 +496,9 @@ function bearAttack() {
     whaleX = 400;
     whaleY = 200;
     whaleHealth = maxWhaleHealth;
+    froggyHealth = maxFroggyHealth;
     updateWhaleHealthBar();
+    updateFroggyHealthBar();
     gameActive = true;
     banner.textContent = instructions;
     endMessage.style.display = 'none';
