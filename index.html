@@ -100,6 +100,13 @@
       font-size: 14px;
       margin-top: 5px;
     }
+    #action-log {
+      font-size: 12px;
+      margin-top: 5px;
+      height: 40px;
+      overflow-y: auto;
+      width: 100%;
+    }
     #button-bar {
       margin-bottom: 5px;
     }
@@ -182,13 +189,14 @@
     <button id="btn-right">&#9654;</button>
     <button id="btn-down">&#9660;</button>
   </div>
-  <div id="controls">
-    <div id="button-bar">
-      <button class="btn" onclick="newGame()">New Game</button>
-      <button class="btn" onclick="quitGame()">Quit</button>
+    <div id="controls">
+      <div id="button-bar">
+        <button class="btn" onclick="newGame()">New Game</button>
+        <button class="btn" onclick="quitGame()">Quit</button>
+      </div>
+      <div id="banner"></div>
+      <div id="action-log"></div>
     </div>
-    <div id="banner"></div>
-  </div>
 
   <script>
     const version = 1;
@@ -200,6 +208,7 @@
     const froggyHealthFill = document.getElementById('froggy-health');
     const froggyHpText = document.getElementById('froggy-hp');
     const endMessage = document.getElementById('end-message');
+    const actionLog = document.getElementById('action-log');
     let x = 50;
     let y = 50;
     const step = 10;
@@ -262,6 +271,13 @@
       const percent = (froggyHealth / maxFroggyHealth) * 100;
       froggyHealthFill.style.width = percent + '%';
       froggyHpText.textContent = froggyHealth;
+  }
+
+  function logAttack(attacker, victim, damage, died) {
+      const div = document.createElement('div');
+      div.textContent = `${attacker} damaged ${victim} ${damage}` + (died ? ` ${victim} died` : '');
+      actionLog.appendChild(div);
+      actionLog.scrollTop = actionLog.scrollHeight;
   }
 
   function updateBearPosition() {
@@ -336,6 +352,8 @@
       setTimeout(() => {
           whale.style.backgroundImage = "url('whale-boss.png')";
       }, 300);
+      const dmg = froggyHealth;
+      logAttack('Whale', 'Froggy', dmg, true);
       gameOver();
   }
 
@@ -363,6 +381,7 @@ function performAttack() {
   const dy = y - whaleY;
   if (Math.hypot(dx, dy) <= 100) {
     whaleHealth--;
+    logAttack('Froggy', 'Whale', 1, whaleHealth <= 0);
     updateWhaleHealthBar();
     whale.style.backgroundImage = "url('whale-boss-hit.png')";
     setTimeout(() => {
@@ -398,7 +417,13 @@ function moveMiniWhales() {
 
         // collision with froggy
         if (Math.hypot(x - mw.x, y - mw.y) <= 50) {
-            gameOver();
+            froggyHealth--;
+            logAttack('Mini Whale', 'Froggy', 1, froggyHealth <= 0);
+            if (froggyHealth <= 0) {
+                gameOver();
+            } else {
+                updateFroggyHealthBar();
+            }
         }
         // collision with bearbear
         if (bearAlive && Math.hypot(bearX - mw.x, bearY - mw.y) <= 50) {
@@ -406,6 +431,7 @@ function moveMiniWhales() {
             bearbear.style.display = 'none';
             mw.el.remove();
             miniWhales.splice(i,1);
+            logAttack('Mini Whale', 'Bearbear', 1, true);
         }
     }
 }
@@ -427,6 +453,7 @@ function bearAttack() {
   const dy = bearY - whaleY;
   if (Math.hypot(dx, dy) <= 100) {
     whaleHealth--;
+    logAttack('Bearbear', 'Whale', 1, whaleHealth <= 0);
     updateWhaleHealthBar();
     whale.style.backgroundImage = "url('whale-boss-hit.png')";
     setTimeout(() => { if (whaleHealth > 0) whale.style.backgroundImage = "url('whale-boss.png')"; }, 300);
@@ -446,6 +473,7 @@ function bearAttack() {
     if (Math.hypot(ddx, ddy) <= 100) {
       mw.el.remove();
       miniWhales.splice(i, 1);
+      logAttack('Bearbear', 'Mini Whale', 1, true);
     }
   }
 }
@@ -519,6 +547,8 @@ function bearAttack() {
     bearbear.style.backgroundImage = "url('minion-bear.png')";
     bearbear.style.display = 'block';
     updateBearPosition();
+
+    actionLog.textContent = '';
 
     miniWhales.forEach(m => m.el.remove());
     miniWhales.length = 0;
