@@ -287,13 +287,33 @@
 
   function moveBearbear() {
       if (!bearAlive) return;
-      const dx = x - bearX;
-      const dy = y - bearY;
-      const dist = Math.hypot(dx, dy);
-      if (dist > 0) {
+
+      // keep distance from the boss whale
+      const distWhale = Math.hypot(bearX - whaleX, bearY - whaleY);
+      if (distWhale <= 120) {
+          const dxw = bearX - whaleX;
+          const dyw = bearY - whaleY;
+          if (Math.abs(dxw) > bearStep) bearX += Math.sign(dxw) * bearStep; else bearX += dxw;
+          if (Math.abs(dyw) > bearStep) bearY += Math.sign(dyw) * bearStep; else bearY += dyw;
+          updateBearPosition();
+          return;
+      }
+
+      // move toward closest mini whale if any
+      let target = null;
+      let minDist = Infinity;
+      for (const mw of miniWhales) {
+          const d = Math.hypot(mw.x - bearX, mw.y - bearY);
+          if (d < minDist) { target = mw; minDist = d; }
+      }
+
+      if (target) {
+          const dx = target.x - bearX;
+          const dy = target.y - bearY;
           if (Math.abs(dx) > bearStep) bearX += Math.sign(dx) * bearStep; else bearX += dx;
           if (Math.abs(dy) > bearStep) bearY += Math.sign(dy) * bearStep; else bearY += dy;
       }
+
       updateBearPosition();
   }
 
@@ -415,14 +435,18 @@ function moveMiniWhales() {
         mw.el.style.left = mw.x + 'px';
         mw.el.style.top = mw.y + 'px';
 
-        // collision with froggy
+        // collision with froggy (attack every 3 seconds)
         if (Math.hypot(x - mw.x, y - mw.y) <= 50) {
-            froggyHealth--;
-            logAttack('Mini Whale', 'Froggy', 1, froggyHealth <= 0);
-            if (froggyHealth <= 0) {
-                gameOver();
-            } else {
-                updateFroggyHealthBar();
+            const now = Date.now();
+            if (now - mw.lastAttack >= 3000) {
+                mw.lastAttack = now;
+                froggyHealth--;
+                logAttack('Mini Whale', 'Froggy', 1, froggyHealth <= 0);
+                if (froggyHealth <= 0) {
+                    gameOver();
+                } else {
+                    updateFroggyHealthBar();
+                }
             }
         }
         // collision with bearbear
@@ -442,7 +466,7 @@ function spawnMiniWhale() {
     el.style.backgroundImage = "url('minion-whale.png')";
     el.style.left = Math.random()*600 + 'px';
     el.style.top = Math.random()*300 + 'px';
-    const obj = {el, x: parseFloat(el.style.left), y: parseFloat(el.style.top)};
+    const obj = {el, x: parseFloat(el.style.left), y: parseFloat(el.style.top), lastAttack: 0};
     document.getElementById('game-container').appendChild(el);
     miniWhales.push(obj);
 }
