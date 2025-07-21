@@ -180,16 +180,36 @@
       background-color: green;
       width: 100%;
     }
-    .minion-hp {
+.minion-hp {
       margin-right: 2px;
       color: white;
       font-weight: bold;
       font-size: 10px;
     }
+
+    #loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+    }
+    #loading-screen img {
+      max-width: 100%;
+      max-height: 100%;
+    }
   </style>
 </head>
 <body>
-    <div id="game-container">
+  <div id="loading-screen">
+    <img src="loading-page.png" alt="Loading" />
+  </div>
+  <div id="game-container">
       <div id="froggy">
         <div id="froggy-health-container">
           <span id="froggy-hp"></span>
@@ -672,15 +692,22 @@ function bearAttack() {
     whale.style.backgroundImage = "url('whale-boss.png')";
     updateWhalePosition();
     updateWhaleHealthBar();
-    newGame();
-    setInterval(() => {
-      if (gameActive) {
-        moveWhale();
-        checkProximity();
-        moveBearbear();
-        moveMiniWhales();
-      }
-    }, 200);
-  </script>
+  newGame();
+  setInterval(() => {
+    if (gameActive) {
+      moveWhale();
+      checkProximity();
+      moveBearbear();
+      moveMiniWhales();
+    }
+  }, 200);
+
+  window.addEventListener('load', () => {
+    const loadingScreen = document.getElementById('loading-screen');
+    setTimeout(() => {
+      loadingScreen.style.display = 'none';
+    }, 5000);
+  });
+</script>
 </body>
 </html>
